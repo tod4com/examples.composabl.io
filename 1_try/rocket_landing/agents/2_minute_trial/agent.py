@@ -1,17 +1,19 @@
 import os
 import sys
 
-sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
+print( "start of the agent===============================")
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+from base_config import *
+
+print("after agent=============================================")
 from composabl import Agent, Runtime, Scenario, Sensor, Skill
 from teacher import NavigationTeacher
-from sensors import sensors
-from config import config
+
+
 from scenarios import Navigation_scenarios
 
-PATH: str = os.path.dirname(os.path.realpath(__file__))
-PATH_HISTORY: str = f"{PATH}/history"
-PATH_CHECKPOINTS : str = f"{PATH}/checkpoints"
+
 
 def run_agent():
     Navigation_skill = Skill("Navigation", NavigationTeacher)
@@ -42,4 +44,4 @@ def run_agent():
 
 if __name__ == "__main__":
     print("the agent")
-    run_agent()
+    #run_agent()

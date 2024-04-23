@@ -1,22 +1,9 @@
 import os
 
 license_key = os.environ["COMPOSABL_LICENSE"]
+PATH: str = os.path.dirname(os.path.realpath(__file__))
+PATH_HISTORY: str = f"{PATH}/history"
 
-config = {
-        "license": license_key,
-        "target": {
-            "docker": {
-                "image": "composabl/sim-starship"
-            },
-            #"local": {
-            #   "address": "localhost:1337"
-            #}
-        },
-        "env": {
-            "name": "starship",
-        },
-        "training": {},
-        "runtime": {
-            "workers": 1
-        }
-    }
+from sensors import sensors
+
+
