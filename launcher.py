@@ -1,38 +1,6 @@
 #! /bin/python3
 
 import os
-
-# Retrieve the environment variable 'COMPOSABL_EULA_AGREED'
-eula_agreed = os.getenv('COMPOSABL_EULA_AGREED')
-
-# Check if the environment variable is set and print its value or a message indicating it's not set
-if eula_agreed == '1' :
-    print(f"COMPOSABL_EULA_AGREED: {eula_agreed}")
-else:
-    print("The environment variable 'COMPOSABL_EULA_AGREED' is not set.")
-    # Print a message asking for a Yes or No input
-    print("Do you agree to the terms? (Yes/No)")
-
-    # Capture the user's input
-    user_input = input()
-
-    # Check the user's input and print a corresponding message
-    if user_input.lower() == 'yes':
-        print("You have agreed to the terms.")
-    elif user_input.lower() == 'no':
-        print("You have not agreed to the terms.")
-        exit()
-    else:
-        print("Invalid input. Please respond with 'Yes' or 'No'.")
-        exit()
-
-    # Set the environment variable 'COMPOSABL_EULA_AGREED'
-    os.environ['COMPOSABL_EULA_AGREED'] = '1'
-
-    # Verify that the environment variable is set
-    eula_agreed = os.getenv('COMPOSABL_EULA_AGREED')
-    print(f"COMPOSABL_EULA_AGREED is now set to: {eula_agreed}")
-
 import subprocess
 # Check if the environment variable 'COMPOSABL_LICENSE' is set
 composabl_license = os.getenv('COMPOSABL_LICENSE')
@@ -55,22 +23,66 @@ def generate_config(license_key, target, image, env_name, workers, num_gpus):
         "num_gpus": num_gpus
     }
 
-"""
-# Path to your JSON file
-user_story_json_file_path = './rocket_landing/agents/config.json'
+
+def load_agent_config():
+# this must be run after the  os.chdir
 
 # Read the JSON file into a dictionary
-try:
-    with open(user_story_json_file_path, 'r') as file:
-        config_data = json.load(file)
-except FileNotFoundError:
-    print(f"Error: The file '{user_story_json_file_path}' was not found.")
-except json.JSONDecodeError:
-    print(f"Error: The file '{user_story_json_file_path}' is not a valid JSON file.")
-# Handle other potential exceptions, such as permission errors
-except Exception as e:
-    print(f"An unexpected error occurred: {e}")
-  """
+    config_data={}
+    try:
+        with open('agent_config.json', 'r') as file:
+            config_data = json.load(file)
+    except FileNotFoundError:
+        print(f" The file was not found. no agent config overrides applied")
+    except json.JSONDecodeError:
+        print(f"Error: The file ' is not a valid JSON file.")
+    # Handle other potential exceptions, such as permission errors
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+    return config_data
+ 
+
+def update_agent_config(config_data):
+    dirty=False
+    print( config_data)
+
+    if not 'runtime' in config_data:
+        print( "no runtuime")
+        config_data['runtime']={}
+        config_data['runtime']["workers"]=1
+        config_data['runtime']["num_gpus"] = 0
+        dirty =True
+ 
+    if 'workers' in config_data['runtime'] and args.workers != -1:
+        if config_data['runtime']["workers"] != args.workers:
+            config_data['runtime']["workers"] = args.workers
+            dirty = True
+    if 'num_gpus' in config_data['runtime'] and args.num_gpus != -1 :
+        if config_data['runtime']["num_gpus"] != args.num_gpus:
+            config_data['runtime']["num_gpus"] = args.num_gpus
+            dirty = True
+
+    print(config_data)      
+    if dirty == True:
+        print( "is dirty")
+
+        # Read the JSON file into a dictionary
+        try:
+            with open('agent_config.json', 'w') as file:
+                json.dump(config_data,file)
+        except FileNotFoundError:
+            print(f" The file was not found. no agent config overrides applied")
+        except json.JSONDecodeError:
+            print(f"Error: The file ' is not a valid JSON file.")
+        # Handle other potential exceptions, such as permission errors
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
+
+
+
+
+        
+
 
 import argparse
 
@@ -78,12 +90,12 @@ import argparse
 parser = argparse.ArgumentParser(description="Process some inputs.")
 
 # Define positional arguments
-parser.add_argument("command", type=str, help="The command to execute")
-parser.add_argument("name", type=str, help="The name associated with the command")
+parser.add_argument("command", type=str, help="The command to execute - teach or operate")
+parser.add_argument("name", type=str, help="The name of the approch")
 
 # Define optional arguments
-parser.add_argument("--workers", type=int, help="Number of workers", default=1)
-parser.add_argument("--num_gpus", type=int, help="Number of GPUs", default=0)
+parser.add_argument("--workers", type=int, help="Number of workers", default=-1)
+parser.add_argument("--num_gpus", type=int, help="Number of GPUs", default=-1)
 
 # Parse the arguments
 args = parser.parse_args()
@@ -109,8 +121,10 @@ if __name__ == '__main__':
         agent_dir=f'{cur_dir}/{args.name}'
         print(agent_dir)
         os.chdir( agent_dir)
+        agent_config = load_agent_config()
+        update_agent_config( agent_config )
         result = subprocess.call(["python3","agent.py"])
-        print(result)
+        #print(result)
 
 
 

@@ -1,19 +1,13 @@
 import os
 import sys
 
-
-print( "start of the agent===============================")
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 from base_config import *
 
-print("after agent=============================================")
 from composabl import Agent, Runtime, Scenario, Sensor, Skill
 from teacher import NavigationTeacher
 
-
 from scenarios import Navigation_scenarios
-
-
 
 def run_agent():
     Navigation_skill = Skill("Navigation", NavigationTeacher)
@@ -44,4 +38,4 @@ def run_agent():
 
 if __name__ == "__main__":
     print("the agent")
-    #run_agent()
+    run_agent()
